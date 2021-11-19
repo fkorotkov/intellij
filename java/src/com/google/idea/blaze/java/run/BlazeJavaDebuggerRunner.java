@@ -87,4 +87,9 @@ public class BlazeJavaDebuggerRunner extends GenericDebuggerRunner {
     EventLoggingService.getInstance().logEvent(getClass(), "debugging-java");
     return super.doExecute(state, env);
   }
+
+  protected RunContentDescriptor doExecuteWithoutLogging(
+      RunProfileState state, ExecutionEnvironment env) throws ExecutionException {
+    return super.doExecute(state, env);
+  }
 }

@@ -37,6 +37,8 @@ public abstract class BlazeJavaDebuggableRunProfileState extends CommandLineStat
   private final BlazeCommandRunConfiguration cfg;
   private final ExecutorType executorType;
 
+  protected String kotlinxCoroutinesJavaAgent;
+
   protected BlazeJavaDebuggableRunProfileState(ExecutionEnvironment environment) {
     super(environment);
     this.cfg = BlazeCommandRunConfigurationRunner.getConfiguration(environment);
@@ -49,6 +51,10 @@ public abstract class BlazeJavaDebuggableRunProfileState extends CommandLineStat
 
   protected ExecutorType getExecutorType() {
     return executorType;
+  }
+
+  public void addKotlinxCoroutinesJavaAgent(String kotlinxCoroutinesJavaAgent) {
+    this.kotlinxCoroutinesJavaAgent = kotlinxCoroutinesJavaAgent;
   }
 
   @Override

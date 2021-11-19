@@ -88,7 +88,11 @@ final class BlazeJavaRunProfileState extends BlazeJavaDebuggableRunProfileState 
     if (testUiSession != null) {
       blazeCommand =
           getBlazeCommandBuilder(
-              project, getConfiguration(), testUiSession.getBlazeFlags(), getExecutorType());
+              project,
+              getConfiguration(),
+              testUiSession.getBlazeFlags(),
+              getExecutorType(),
+              this.kotlinxCoroutinesJavaAgent);
       setConsoleBuilder(
           new TextConsoleBuilderImpl(project) {
             @Override
@@ -100,7 +104,11 @@ final class BlazeJavaRunProfileState extends BlazeJavaDebuggableRunProfileState 
     } else {
       blazeCommand =
           getBlazeCommandBuilder(
-              project, getConfiguration(), ImmutableList.of(), getExecutorType());
+              project,
+              getConfiguration(),
+              ImmutableList.of(),
+              getExecutorType(),
+              this.kotlinxCoroutinesJavaAgent);
     }
     addConsoleFilters(
         new BlazeTargetFilter(true),
@@ -165,6 +173,20 @@ final class BlazeJavaRunProfileState extends BlazeJavaDebuggableRunProfileState 
 
   private static BlazeJavaRunConfigState getState(BlazeCommandRunConfiguration config) {
     return Preconditions.checkNotNull(config.getHandlerStateIfType(BlazeJavaRunConfigState.class));
+  }
+
+  private BlazeCommand.Builder getBlazeCommandBuilder(
+      Project project,
+      BlazeCommandRunConfiguration configuration,
+      List<String> extraBlazeFlags,
+      ExecutorType executorType,
+      String kotlinxCoroutinesJavaAgent) {
+    BlazeCommand.Builder command =
+        getBlazeCommandBuilder(project, configuration, extraBlazeFlags, executorType);
+    if (kotlinxCoroutinesJavaAgent != null && executorType == ExecutorType.DEBUG) {
+      command.addBlazeFlags("--jvmopt=-javaagent:" + kotlinxCoroutinesJavaAgent);
+    }
+    return command;
   }
 
   @VisibleForTesting
