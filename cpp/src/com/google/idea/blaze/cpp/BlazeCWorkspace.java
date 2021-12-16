@@ -447,7 +447,7 @@ public final class BlazeCWorkspace implements ProjectComponent {
     try {
       int i = 0;
       for (OCResolveConfiguration.ModifiableModel config : model.getConfigurations()) {
-        session.schedule(i++, config, toolEnvironment);
+        session.schedule(i++, config, toolEnvironment, config.getUniqueId());
       }
       MultiMap<Integer, Message> messages = new MultiMap<>();
       session.waitForAll(messages);
