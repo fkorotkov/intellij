@@ -15,8 +15,6 @@
  */
 package com.google.idea.blaze.base.command.buildresult;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.idea.blaze.base.command.buildresult.BlazeArtifact.LocalFileArtifact;
@@ -24,10 +22,13 @@ import com.google.idea.blaze.base.filecache.RemoteOutputsCache;
 import com.google.idea.blaze.base.ideinfo.ArtifactLocation;
 import com.google.idea.blaze.base.sync.workspace.ArtifactLocationDecoder;
 import com.intellij.openapi.project.Project;
+
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Collection;
 import java.util.Objects;
-import javax.annotation.Nullable;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /** Helper class for resolving {@link BlazeArtifact}s to local files. */
 public final class OutputArtifactResolver {
@@ -56,9 +57,26 @@ public final class OutputArtifactResolver {
   @Nullable
   public static File resolve(Project project, BlazeArtifact output) {
     if (output instanceof LocalFileArtifact) {
-      return ((LocalFileArtifact) output).getFile();
+      return patchExternalFilePath(((LocalFileArtifact) output).getFile());
     }
     Preconditions.checkState(output instanceof RemoteOutputArtifact);
     return RemoteOutputsCache.getInstance(project).resolveOutput((RemoteOutputArtifact) output);
+  }
+
+
+  /**
+   * Point external workspace symlinks to the corresponding fixed location so IntelliJ doesn't go crazy.
+   */
+  private static File patchExternalFilePath(@Nullable File maybeExternal) {
+    if (maybeExternal == null) {
+      return null;
+    }
+    String externalString = maybeExternal.toString();
+    if (externalString.contains("/external/")
+            && !externalString.contains("/bazel-out/")
+            && !externalString.contains("/blaze-out/")) {
+      return new File(externalString.replaceAll("/execroot.*/external/", "/external/"));
+    }
+    return maybeExternal;
   }
 }
